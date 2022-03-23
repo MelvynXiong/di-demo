@@ -27,8 +27,8 @@ import 'reflect-metadata'
 
 // Factory(TestService).testMethod() // 1
 
-const METHOD_METADATA = 'method'
-const PATH_METADATA = 'path'
+export const META_METHOD = 'method'
+export const META_PATH = 'path'
 
 function mapRoute(instance: Object) {
   const prototype = Object.getPrototypeOf(instance)
@@ -42,8 +42,8 @@ function mapRoute(instance: Object) {
     const fn = prototype[methodName]
 
     // 取出定义的 metadata
-    const route = Reflect.getMetadata(PATH_METADATA, fn)
-    const method = Reflect.getMetadata(METHOD_METADATA, fn)
+    const route = Reflect.getMetadata(META_PATH, fn)
+    const method = Reflect.getMetadata(META_METHOD, fn)
     return {
       route,
       method,
@@ -53,34 +53,33 @@ function mapRoute(instance: Object) {
   })
 }
 
-const Controller = (path: string): ClassDecorator => {
-  return (target) => {
-    Reflect.defineMetadata(PATH_METADATA, path, target)
-  }
-}
-
 const createMappingDecorator =
   (method: string) =>
   (path: string): MethodDecorator => {
     return (target, key, descriptor) => {
-      Reflect.defineMetadata(PATH_METADATA, path, descriptor.value as any)
-      Reflect.defineMetadata(METHOD_METADATA, method, descriptor.value as any)
+      Reflect.defineMetadata(META_PATH, path, descriptor.value as any)
+      Reflect.defineMetadata(META_METHOD, method, descriptor.value as any)
     }
   }
 
-const Get = createMappingDecorator('GET')
-const Post = createMappingDecorator('POST')
-
-@Controller('/test')
-class SomeClass {
-  @Get('/a')
-  someGetMethod() {
-    return 'hello world'
+export const Controller = (path: string): ClassDecorator => {
+  return (target) => {
+    Reflect.defineMetadata(META_PATH, path, target)
   }
-
-  @Post('/b')
-  somePostMethod() {}
 }
-console.log(Reflect.getMetadata(PATH_METADATA, SomeClass)) // '/test'
+export const Get = createMappingDecorator('GET')
+export const Post = createMappingDecorator('POST')
 
-console.log(mapRoute(new SomeClass()))
+// @Controller('/test')
+// class SomeClass {
+//   @Get('/a')
+//   someGetMethod() {
+//     return 'hello world'
+//   }
+
+//   @Post('/b')
+//   somePostMethod() {}
+// }
+// console.log(Reflect.getMetadata(META_PATH, SomeClass)) // '/test'
+
+// console.log(mapRoute(new SomeClass()))

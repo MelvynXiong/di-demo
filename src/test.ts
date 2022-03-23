@@ -1,8 +1,11 @@
-class Foo {
-  foo: number; // 我们想要捕获的类型
+import 'reflect-metadata'
+@Reflect.metadata('classExtension', 'This is a class extension!')
+class Test {
+  @Reflect.metadata('methodExtension', 'This is a method extension!')
+  public hello(): string {
+    return 'hello world'
+  }
 }
 
-declare let _foo: Foo;
-
-// 与之前做法相同
-let bar: typeof _foo.foo;
+console.log(Reflect.getMetadata('classExtension', Test)) // This is a class extension!
+console.log(Reflect.getMetadata('methodExtension', new Test(), 'hello')) // This is a method extension!
