@@ -13,7 +13,7 @@ app.use(logger)
 app.use(time)
 app.use(bodyParser())
 app.use(staticFiles('/static/', path.join(__dirname, 'static')))
-app.use(template('views', { noCache: !isProd, watch: !isProd }))
+app.use(template(path.resolve(__dirname, 'views'), { noCache: !isProd, watch: !isProd }))
 app.use(controller())
 
 // 在端口3000监听:

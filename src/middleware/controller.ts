@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import Router from '@koa/router'
 import { META_PATH, META_METHOD } from '../decorator'
+import colors from 'colors'
 
 const router = new Router()
 
@@ -26,12 +27,12 @@ function registerUrl(router: Router, prefixRoute: string, target: object) {
     const route = Reflect.getMetadata(META_PATH, fn)
     const method = Reflect.getMetadata(META_METHOD, fn)
     const finalRoute = path.join(prefixRoute, route)
-    console.log(1, route, method)
 
     if (method === 'GET') {
       router.get(finalRoute, fn)
-      console.log(`register URL mapping: GET ${finalRoute}`)
+      console.log(`注册 GET 请求：${finalRoute}`)
     } else if (method === 'POST') {
+      console.log(`注册 POST 请求：${finalRoute}`)
       router.post(finalRoute, fn)
     } else {
       console.log(`invalid URL: ${finalRoute}`)
@@ -44,7 +45,7 @@ function readControllerFile(router: Router, dir: string) {
   const tsFiles = files.filter((item) => item.endsWith('.ts'))
 
   for (let file of tsFiles) {
-    console.log(`开始处理controller：${file}`)
+    console.log(colors.blue(`开始处理controller：${file}`))
     // 自定义的 controller 类
     const controllerClass = require(path.join(dir, file))
     // 获取前置路由
