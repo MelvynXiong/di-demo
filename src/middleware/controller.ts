@@ -6,6 +6,8 @@ import colors from 'colors'
 
 const router = new Router()
 
+type Constructor<T = any> = new (...args: any[]) => T
+
 function isConstructor(target: string) {
   return target === 'constructor'
 }
@@ -29,11 +31,11 @@ function registerUrl(router: Router, prefixRoute: string, target: object) {
     const finalRoute = path.join(prefixRoute, route)
 
     if (method === 'GET') {
-      router.get(finalRoute, fn)
+      router.get(finalRoute, fn.bind(target))
       console.log(`注册 GET 请求：${finalRoute}`)
     } else if (method === 'POST') {
       console.log(`注册 POST 请求：${finalRoute}`)
-      router.post(finalRoute, fn)
+      router.post(finalRoute, fn.bind(target))
     } else {
       console.log(`invalid URL: ${finalRoute}`)
     }
@@ -50,7 +52,12 @@ function readControllerFile(router: Router, dir: string) {
     const controllerClass = require(path.join(dir, file))
     // 获取前置路由
     const prefixRoute = Reflect.getMetadata(META_PATH, controllerClass.default)
-    registerUrl(router, prefixRoute, new controllerClass.default())
+    // 获取注入的service 类列表
+    const providers = Reflect.getMetadata('design:paramtypes', controllerClass.default)
+    // 实例化 service
+    const args = providers?.map((provider: Constructor) => new provider()) || []
+
+    registerUrl(router, prefixRoute, new controllerClass.default(...args))
   }
 }
 
